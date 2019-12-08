@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.demonworld.sample</groupId>
+    <artifactId>sample-vertxrx</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>sample-vertxrx-servicetest</artifactId>
+
+  <properties>
+    <service.target>http://localhost:8080</service.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>${project.artifactId}</finalName>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <configuration>
+          <verbose>true</verbose>
+          <showLogs>true</showLogs>
+          <startParallel>true</startParallel>
+          <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
+          <images>
+            <image>
+              <alias>${technicalComponentName}</alias>
+              <name>${docker.image.name}</name>
+              <run>
+                <namingStrategy>alias</namingStrategy>
+                <imagePullPolicy>never</imagePullPolicy>
+                <network>
+                  <mode>custom</mode>
+                  <name>custom_network</name>
+                  <alias>service</alias>
+                </network>
+                <ports>
+                  <port>8080:8080</port>
+                  <port>8443:8443</port>
+                </ports>
+                <wait>
+                  <!-- <http> FIXME no response
+                    <url>${service.target}/health</url>
+                    <method>GET</method>
+                    <status>200..399</status>
+                  </http> -->
+                  <time>200</time>
+                </wait>
+              </run>
+            </image>
+          </images>
+        </configuration>
+        <executions>
+          <execution>
+            <id>docker-start-container</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>docker-stop-container</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
